@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHATIFI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="navbar-brand">CHATIFI</div>
+        </nav>
+    </header>
+
+    <div class="chat-container">
+        <div id="chat" class="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="username" placeholder="Enter your username" class="input-field" />
+            <input type="text" id="message" placeholder="Type a message..." class="input-field" />
+            <button id="send" class="send-button">Send</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            &copy; 2024 CHATIFI. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:3002');
+        const usernameInput = document.getElementById('username');
+        const messageInput = document.getElementById('message');
+
+        ws.onmessage = (event) => {
+            const chat = document.getElementById('chat');
+            const messageData = JSON.parse(event.data);
+            const timestamp = new Date(messageData.timestamp).toLocaleTimeString();
+            chat.innerHTML += `<div class="chat-message"><strong>${messageData.username}</strong> [${timestamp}]: ${messageData.message}</div>`;
+            chat.scrollTop = chat.scrollHeight; // Auto-scroll to the bottom
+        };
+
+        document.getElementById('send').onclick = () => {
+            const message = messageInput.value;
+            const username = usernameInput.value || 'Anonymous';
+            const messageData = {
+                username: username,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+            ws.send(JSON.stringify(messageData));
+            messageInput.value = '';
+        };
+    </script>
+</body>
+</html>
